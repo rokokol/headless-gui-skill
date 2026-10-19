@@ -9,15 +9,15 @@
 
 </div>
 
-An agent that tests a GUI app on your desktop shares your input with it. The window takes focus while you type, a synthetic keystroke goes to your editor, the pointer jumps under your hand. A tool that injects input through `uinput` reaches your session whatever display it was given
+An agent that tests a GUI app on your desktop shares your input with it. The window takes focus while you type, a synthetic keystroke goes to your editor, the pointer jumps under your hand. A tool that injects input through `uinput` reaches your session whatever display it was given. An app started on your D-Bus session can hand its window to the copy you already run, so even an app the agent started elsewhere can open on your screen
 
-This skill gives the agent its own desktop instead: a nested sway with the headless backend, rendered on the CPU into memory, with its own Wayland and IPC sockets. The agent starts the app there, waits for its window, clicks through sway's own seat commands, types with `wtype` and reads screenshots from `grim`. Wayland apps and X11 apps through Xwayland both work. Your compositor can be anything: the nested sway does not depend on it
+This skill gives the agent its own desktop instead: a nested sway with the headless backend, rendered on the CPU into memory, with its own Wayland and IPC sockets and its own D-Bus session. The agent starts the app there, waits for its window, clicks through sway's own seat commands, types with `wtype` and reads screenshots from `grim`. Wayland apps and X11 apps through Xwayland both work. Your compositor can be anything: the nested sway does not depend on it
 
 A headless sway has no input devices, and a toolkit such as GTK ignores keys and clicks until the seat has a pointer and a keyboard. An idle VNC client connected to `wayvnc` over a private unix socket keeps both on the seat for as long as the session runs
 
 ## Requirements
 
-Linux with `sway`, `grim`, `wtype`, `wayvnc` and vncdotool on hand, from the package manager or from `nix shell`. No GPU is needed
+Linux with `sway`, `grim`, `wtype`, `wayvnc`, vncdotool and dbus on hand, from the package manager or from `nix shell`. No GPU is needed
 
 ## Install
 
