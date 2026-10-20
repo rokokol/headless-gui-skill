@@ -46,12 +46,13 @@ The shell does not keep variables between commands, so each one sets the same en
 
 ```sh
 unset HYPRLAND_INSTANCE_SIGNATURE
-export WAYLAND_DISPLAY=$(echo $R/wayland-[0-9]) SWAYSOCK=$(echo $R/sway-ipc.*.sock) $(cat $R/env)
+export XDG_RUNTIME_DIR=$R WAYLAND_DISPLAY=$(echo $R/wayland-[0-9]) SWAYSOCK=$(echo $R/sway-ipc.*.sock) $(cat $R/env)
 ```
 
-`$R/env` holds what only sway knows: the `DISPLAY` of the Xwayland it starts on demand for X11 apps, and the address of the private bus
+`$R/env` holds what only sway knows: the `DISPLAY` of the Xwayland it starts on demand for X11 apps, and the address of the private bus. `XDG_RUNTIME_DIR` keeps the app's runtime files in `$R` as well: an app that keeps one instance through a lock file there, such as rofi's `rofi.pid`, otherwise takes the user's lock and stops the user's own copy from starting
 
 - **Start the app from the agent's shell**: `setsid <command> >$R/app.log 2>&1 </dev/null &`. It keeps the shell's `PATH`, working directory and project environment. `swaymsg exec` loses them: the child gets sway's environment from the moment sway started, and fails with `command not found` for anything that was not on that `PATH`
+- **An app the private bus starts needs the environment pushed to the bus first**: `dbus-update-activation-environment WAYLAND_DISPLAY DISPLAY XDG_RUNTIME_DIR PATH`. A desktop entry with `DBusActivatable=true`, launched through `gtk-launch` or `gio`, is started by the bus, and the bus has the environment from before sway started, with no `WAYLAND_DISPLAY`. Without the push the launch reports success and the app exits with no window
 - **Wait for the window, not for a time**: poll `swaymsg -t get_tree` until it holds the app's `"app_id"` (Wayland) or `"class"` (X11). The same tree gives each window's `rect`, in the pixels a click and a crop use
 - **Screenshot**: `grim <file>.png`, or `grim -g '<x>,<y> <w>x<h>' <file>.png` for one window, then read the image. `grim -c` draws the pointer too
 - **Click**: `swaymsg seat seat0 cursor set <x> <y>`, then `swaymsg seat seat0 cursor press button1` and `swaymsg seat seat0 cursor release button1`. The position is absolute. With no config, focus follows the pointer
